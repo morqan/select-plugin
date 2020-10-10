@@ -1,13 +1,15 @@
-const getTemplate = () =>{
+const getTemplate = (data = [], placeholder) =>{
+    const text = placeholder ?? 'select'
+    const items = data.map( item => {
+        return `<li class="select__item" data-type = 'item' data-id = '${item.id}'>${item.value}</li>`
+    })
     return ` <div class="select__input" data-type = 'input'>
-                    <span>click</span>
+                    <span data-type = 'value'>${text}</span>
                     <i class="fas fa-chevron-down" data-type = arrow></i>
                 </div>
                 <div class="select__dropdown">
                     <ul class="select__list">
-                        <li class="select__item">React</li>
-                        <li class="select__item">Veu</li>
-                        <li class="select__item">Angular</li>
+                        ${items.join('')}               
                     </ul>
                 </div>`
 }
@@ -15,31 +17,50 @@ const getTemplate = () =>{
 export class Select {
     constructor(selector, options) {
         this.$el = document.querySelector(selector)
+        this.options = options
+        this.selectedId = null
 
         this.#render()
         this.#setup()
     }
 
     #render(){
+        const {placeholder, data} = this.options
         this.$el.classList.add('select')
-        this.$el.innerHTML = getTemplate()
+        this.$el.innerHTML = getTemplate(data, placeholder)
     }
     #setup(){
         this.clickHandler = this.clickHandler.bind(this)
         this.$el.addEventListener('click',this.clickHandler)
         this.$arrow = this.$el.querySelector('[data-type="arrow"]')
+        this.$value = this.$el.querySelector('[data-type="value"]')
     }
 
     clickHandler(event){
         const {type} = event.target.dataset
         if (type === 'input'){
             this.toggle()
+            console.log('click')
+        }else if (type === 'item'){
+            const id = +event.target.dataset.id
+            this.select(id)
+            console.log(id,' = selected item id')
         }
-        console.log('click')
+
     }
 
     get isOpen(){
         return this.$el.classList.contains('open')
+    }
+
+    get current(){
+        return this.options.data.find(item => item.id === this.selectedId)
+    }
+
+    select(id){
+        this.selectedId = id
+        this.$value.textContent = this.current.value
+        this.close()
     }
 
     toggle(){

@@ -18,9 +18,12 @@ $height: 46px;
 .select{
   width: 100%;
   position: relative;
-
+  z-index: 99;
   &.open{
     .select__dropdown{
+      display: block;
+    }
+    .select__backdrop{
       display: block;
     }
   }
@@ -52,11 +55,24 @@ $height: 46px;
     display: none;
   }
 
+  &__backdrop{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    display: none;
+    background: transparent;
+  }
+
   &__list{
     margin: 0;
     padding: 0;
     list-style: none;
   }
+
+
   &__item{
     padding: 1rem;
 
@@ -64,6 +80,9 @@ $height: 46px;
       border-bottom: 1px solid #ccc;
     }
 
+    &.selected{
+      background-color: #eee;
+    }
 
     &:hover{
       cursor: pointer;

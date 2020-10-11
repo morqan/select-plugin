@@ -1,9 +1,17 @@
-const getTemplate = (data = [], placeholder) =>{
-    const text = placeholder ?? 'select'
+const getTemplate = (data = [], placeholder, selectedId) =>{
+    let text = placeholder ?? 'select'
+
     const items = data.map( item => {
-        return `<li class="select__item" data-type = 'item' data-id = '${item.id}'>${item.value}</li>`
+        let cls = ''
+        if (item.id === selectedId){
+            text = item.value
+            cls = 'selected'
+        }
+        return `<li class="select__item ${cls}" data-type = 'item' data-id = '${item.id}'>${item.value}</li>`
     })
-    return ` <div class="select__input" data-type = 'input'>
+    return ` 
+                <div class="select__backdrop" data-type="backdrop"></div>
+                <div class="select__input" data-type = 'input'>
                     <span data-type = 'value'>${text}</span>
                     <i class="fas fa-chevron-down" data-type = arrow></i>
                 </div>
@@ -18,7 +26,7 @@ export class Select {
     constructor(selector, options) {
         this.$el = document.querySelector(selector)
         this.options = options
-        this.selectedId = null
+        this.selectedId = options.selectedId
 
         this.#render()
         this.#setup()
@@ -27,7 +35,7 @@ export class Select {
     #render(){
         const {placeholder, data} = this.options
         this.$el.classList.add('select')
-        this.$el.innerHTML = getTemplate(data, placeholder)
+        this.$el.innerHTML = getTemplate(data, placeholder, this.selectedId)
     }
     #setup(){
         this.clickHandler = this.clickHandler.bind(this)
@@ -45,6 +53,9 @@ export class Select {
             const id = +event.target.dataset.id
             this.select(id)
             console.log(id,' = selected item id')
+        }else if(type === 'backdrop'){
+            console.log('backdrop')
+            this.toggle()
         }
 
     }
@@ -60,6 +71,10 @@ export class Select {
     select(id){
         this.selectedId = id
         this.$value.textContent = this.current.value
+        this.$el.querySelectorAll(`[data-type='item']`).forEach( el => {
+            el.classList.remove('selected')
+        })
+        this.$el.querySelector(`[data-id='${id}']`).classList.add('selected')
         this.close()
     }
 
@@ -81,5 +96,6 @@ export class Select {
 
     destroy(){
         this.$el.removeEventListener('click', this.clickHandler)
+        this.$el.innerHTML = ''
     }
 }
